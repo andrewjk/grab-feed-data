@@ -1,0 +1,31 @@
+{
+  "name": "grab-feed-data",
+  "version": "1.0.0",
+  "description": "Grabs feed and entry data out of an RSS, Atom or JSON Feed file",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "browser": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "uvu -r tsm tests"
+  },
+  "keywords": [
+    "rss",
+    "atom",
+    "jsonfeed",
+    "feed"
+  ],
+  "author": "andrewjk",
+  "license": "ISC",
+  "devDependencies": {
+    "tsm": "^2.3.0",
+    "tsup": "^6.6.3",
+    "typescript": "^4.9.5",
+    "uvu": "^0.5.6"
+  },
+  "dependencies": {
+    "txml": "^5.1.1"
+  }
+}
