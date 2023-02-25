@@ -24,7 +24,7 @@ function processNode(node: TxmlNode, result: FeedLink[]) {
   ) {
     // We need at least type and href
     let type = node.attributes["type"];
-    const href = node.attributes["href"];
+    const url = node.attributes["href"];
 
     // TODO: Is this a valid assumption for all feeds? Or are there other (potentially messed up) types out there?
     switch (type) {
@@ -49,10 +49,10 @@ function processNode(node: TxmlNode, result: FeedLink[]) {
       }
     }
 
-    if (type && href) {
+    if (type && url) {
       const link: FeedLink = {
         type,
-        href,
+        url,
       };
       const title = node.attributes["title"];
       if (title) {

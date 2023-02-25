@@ -9,18 +9,18 @@ test("JSON data", () => {
   const expected: FeedData = {
     type: "json",
     title: "My Example Feed",
-    link: "https://example.org/",
+    homeUrl: "https://example.org/",
     entries: [
       {
         title: "",
         content: "This is a second item.",
-        link: "https://example.org/second-item",
+        entryUrl: "https://example.org/second-item",
         guid: "2",
       },
       {
         title: "",
         content: "<p>Hello, world!</p>",
-        link: "https://example.org/initial-post",
+        entryUrl: "https://example.org/initial-post",
         guid: "1",
       },
     ],

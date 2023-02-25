@@ -11,23 +11,23 @@ test("Atom data", () => {
     title: "dive into mark",
     description:
       "A &lt;em&gt;lot&lt;/em&gt; of effort\n    went into making this effortless",
-    link: "http://example.org/",
-    date: "2005-07-31T12:29:29Z",
+    homeUrl: "http://example.org/",
     copyright: "Copyright (c) 2003, Mark Pilgrim",
+    updatedAt: "2005-07-31T12:29:29Z",
     generator: "Example Toolkit",
     entries: [
       {
         title: "Atom draft-07 snapshot",
         content:
           '<div xmlns="http://www.w3.org/1999/xhtml"><p><i>[Update: The Atom draft is finished.]</i></p></div>',
-        link: "http://example.org/2005/04/02/atom",
-        date: "2005-07-31T12:29:29Z",
-        pubDate: "2003-12-13T08:29:29-04:00",
+        entryUrl: "http://example.org/2005/04/02/atom",
         author: {
           name: "Mark Pilgrim",
-          uri: "http://example.org/",
+          url: "http://example.org/",
           email: "f8dy@example.com",
         },
+        updatedAt: "2005-07-31T12:29:29Z",
+        publishedAt: "2003-12-13T08:29:29-04:00",
         guid: "tag:example.org,2003:3.2397",
       },
     ],

@@ -22,21 +22,21 @@ test("Feed links", () => {
   const expected: FeedLink[] = [
     {
       type: "rss",
-      href: "http://myblog.example.com/rss",
+      url: "http://myblog.example.com/rss",
     },
     {
       type: "atom",
-      href: "http://myblog.example.com/atom",
+      url: "http://myblog.example.com/atom",
       title: "Atom feed",
     },
     {
       type: "json",
-      href: "http://myblog.example.com/json",
+      url: "http://myblog.example.com/json",
       title: "JSON feed",
     },
     {
       type: "json",
-      href: "http://myblog.example.com/comments",
+      url: "http://myblog.example.com/comments",
       title: "JSON comments",
     },
   ];

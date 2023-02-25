@@ -1,5 +1,5 @@
 import { parse } from "txml";
-import AuthorData from "../types/AuthorData";
+import PersonData from "../types/PersonData";
 import EntryData from "../types/EntryData";
 import FeedData from "../types/FeedData";
 import TxmlNode from "../types/TxmlNode";
@@ -16,11 +16,7 @@ export default function grabXmlFeedData(content: string): FeedData {
     keepWhitespace: true,
     noChildNodes: [],
   });
-  //for (let node of doc) {
-  //  if (nodeIsElement(node)) {
-  //    processNode(node as TxmlNode, result);
-  //  }
-  //}
+
   processChildNodes(doc, result, processNode);
 
   return result;
@@ -43,6 +39,8 @@ function processNode(node: TxmlNode, result: FeedData) {
   }
 }
 
+// TODO: Split this out into RSS and Atom methods
+
 function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
   for (let node of feedNode.children) {
     if (nodeIsElement(node)) {
@@ -60,26 +58,25 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
         case "link": {
           // For RSS the link is the text, for Atom it's the value of `href` in an element with rel="alternate"
           if (feed.type === "rss") {
-            feed.link = getContentString(node);
+            feed.homeUrl = getContentString(node);
           } else if (feed.type === "atom") {
             if (node.attributes["rel"] === "alternate") {
-              feed.link = node.attributes["href"];
+              feed.homeUrl = node.attributes["href"];
             }
           }
           break;
         }
         case "xmlUrl": {
-          feed.xmlUrl = getContentString(node);
+          feed.feedUrl = getContentString(node);
           break;
         }
-        case "date":
-        case "updated": {
-          feed.date = getContentString(node);
+        case "language": {
+          feed.language = getContentString(node);
           break;
         }
-        case "pubDate":
-        case "published": {
-          feed.pubDate = getContentString(node);
+        case "copyright":
+        case "rights": {
+          feed.copyright = getContentString(node);
           break;
         }
         case "author": {
@@ -97,8 +94,14 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
           }
           break;
         }
-        case "language": {
-          feed.language = getContentString(node);
+        case "date":
+        case "updated": {
+          feed.updatedAt = getContentString(node);
+          break;
+        }
+        case "pubDate":
+        case "published": {
+          feed.publishedAt = getContentString(node);
           break;
         }
         case "image": {
@@ -106,12 +109,7 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
           break;
         }
         case "favicon": {
-          feed.favicon = getContentString(node);
-          break;
-        }
-        case "copyright":
-        case "rights": {
-          feed.copyright = getContentString(node);
+          feed.icon = getContentString(node);
           break;
         }
         case "generator": {
@@ -124,9 +122,7 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
         //}
         case "item":
         case "entry": {
-          const entry = {
-            title: "",
-          };
+          const entry = {};
           feed.entries.push(entry);
           processEntryNode(node, feed, entry);
           break;
@@ -149,44 +145,34 @@ function processEntryNode(
           entry.title = getContentString(node);
           break;
         }
+        case "summary": {
+          entry.summary = getContentString(node);
+          break;
+        }
         case "description":
         case "content": {
           entry.content = getContentString(node);
           break;
         }
-        case "summary": {
-          entry.summary = getContentString(node);
-          break;
-        }
         case "link": {
           // For RSS the link is the text, for Atom it's the value of `href` in an element with rel="alternate"
           if (feed.type === "rss") {
-            entry.link = getContentString(node);
+            entry.entryUrl = getContentString(node);
           } else if (feed.type === "atom") {
             if (node.attributes["rel"] === "alternate") {
-              entry.link = node.attributes["href"];
+              entry.entryUrl = node.attributes["href"];
             }
           }
           break;
         }
-        case "originalLink": {
-          entry.originalLink = getContentString(node);
-          break;
-        }
-        case "permaLink": {
-          entry.permaLink = getContentString(node);
-          break;
-        }
-        case "date":
-        case "updated": {
-          entry.date = getContentString(node);
-          break;
-        }
-        case "pubDate":
-        case "published": {
-          entry.pubDate = getContentString(node);
-          break;
-        }
+        //case "externalLink": {
+        //  entry.externalUrl = getContentString(node);
+        //  break;
+        //}
+        //case "permalink": {
+        //  entry.permalink = getContentString(node);
+        //  break;
+        //}
         case "author": {
           // For RSS the author is the text, for Atom it's an element
           if (feed.type === "rss") {
@@ -201,6 +187,15 @@ function processEntryNode(
             processAuthorNode(node, author);
           }
           break;
+        }
+        case "date":
+        case "updated": {
+          entry.updatedAt = getContentString(node);
+          break;
+        }
+        case "pubDate":
+        case "published": {
+          entry.publishedAt = getContentString(node);
           break;
         }
         case "guid":
@@ -209,7 +204,7 @@ function processEntryNode(
           break;
         }
         case "comments": {
-          entry.comments = getContentString(node);
+          entry.commentsUrl = getContentString(node);
           break;
         }
         //case "image": {
@@ -225,7 +220,7 @@ function processEntryNode(
         //  break;
         //}
         //case "enclosures": {
-        //  entry.enclosures = getContentString(node);
+        //  entry.attachments = getContentString(node);
         //  break;
         //}
       }
@@ -233,7 +228,7 @@ function processEntryNode(
   }
 }
 
-function processAuthorNode(authorNode: TxmlNode, author: AuthorData) {
+function processAuthorNode(authorNode: TxmlNode, author: PersonData) {
   for (let node of authorNode.children) {
     if (nodeIsElement(node)) {
       node = node as TxmlNode;
@@ -243,7 +238,7 @@ function processAuthorNode(authorNode: TxmlNode, author: AuthorData) {
           break;
         }
         case "uri": {
-          author.uri = getContentString(node);
+          author.url = getContentString(node);
           break;
         }
         case "email": {

@@ -20,7 +20,7 @@ function processFeed(obj: any, feed: FeedData) {
     feed.title = obj.title;
   }
   if (obj.home_page_url) {
-    feed.link = obj.home_page_url;
+    feed.homeUrl = obj.home_page_url;
   }
   if (obj.items && Array.isArray(obj.items)) {
     for (let entryObj of obj.items) {
@@ -46,7 +46,7 @@ function processEntry(obj: any, entry: EntryData) {
     }
   }
   if (obj.url) {
-    entry.link = obj.url;
+    entry.entryUrl = obj.url;
   }
   if (obj.id) {
     entry.guid = obj.id;
