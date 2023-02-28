@@ -1,7 +1,8 @@
 import { parse } from "txml";
-import PersonData from "../types/PersonData";
-import EntryData from "../types/EntryData";
 import FeedData from "../types/FeedData";
+import EntryData from "../types/EntryData";
+import PersonData from "../types/PersonData";
+import ImageData from "../types/ImageData";
 import TxmlNode from "../types/TxmlNode";
 
 /** Grab metadata and entries from an RSS or Atom feed file */
@@ -17,35 +18,47 @@ export default function grabXmlFeedData(content: string): FeedData {
     noChildNodes: [],
   });
 
-  processChildNodes(doc, result, processNode);
+  processChildNodes(doc, result);
 
   return result;
 }
 
-// TODO: Should we be stricter here??
-
-function processNode(node: TxmlNode, result: FeedData) {
-  if (node.tagName === "channel") {
-    // It's an RSS feed
-    result.type = "rss";
-    processFeedNode(node, result);
-  } else if (node.tagName === "feed") {
-    // It's an Atom feed
-    result.type = "atom";
-    processFeedNode(node, result);
-  } else {
-    // Keep going...
-    processChildNodes(node.children, result, processNode);
+function processChildNodes(children: (TxmlNode | string)[], feed: FeedData) {
+  for (let child of children) {
+    if (nodeIsElement(child)) {
+      processNode(child as TxmlNode, feed);
+    }
   }
 }
 
-// TODO: Split this out into RSS and Atom methods
+function processNode(node: TxmlNode, feed: FeedData) {
+  if (node.tagName === "channel") {
+    // It's an RSS feed
+    feed.type = "rss";
+    processFeedNode(node, feed);
+  } else if (node.tagName === "feed") {
+    // It's an Atom feed
+    feed.type = "atom";
+    if (node.attributes["xml:lang"]) {
+      feed.language = node.attributes["xml:lang"];
+    }
+    processFeedNode(node, feed);
+  } else if (node.tagName === "image") {
+    // Apparently RSS1 could have its image alongside the channel
+    feed.image = {};
+    processImageNode(node, feed.image);
+  } else {
+    // Keep going...
+    processChildNodes(node.children, feed);
+  }
+}
 
 function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
   for (let node of feedNode.children) {
     if (nodeIsElement(node)) {
       node = node as TxmlNode;
-      switch (node.tagName) {
+      const tagName = node.tagName.toLowerCase();
+      switch (tagName) {
         case "title": {
           feed.title = getContentString(node);
           break;
@@ -55,18 +68,29 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
           feed.description = getContentString(node);
           break;
         }
-        case "link": {
+        case "link":
+        case "atom:link": {
           // For RSS the link is the text, for Atom it's the value of `href` in an element with rel="alternate"
-          if (feed.type === "rss") {
-            feed.homeUrl = getContentString(node);
-          } else if (feed.type === "atom") {
-            if (node.attributes["rel"] === "alternate") {
-              feed.homeUrl = node.attributes["href"];
+          if (feed.type === "atom" || tagName === "atom:link") {
+            const rel = node.attributes["rel"];
+            switch (rel) {
+              case null:
+              case undefined:
+              case "alternate": {
+                feed.homeUrl = node.attributes["href"];
+                break;
+              }
+              case "self": {
+                feed.feedUrl = node.attributes["href"];
+                break;
+              }
             }
+          } else if (feed.type === "rss") {
+            feed.homeUrl = getContentString(node);
           }
           break;
         }
-        case "xmlUrl": {
+        case "xmlurl": {
           feed.feedUrl = getContentString(node);
           break;
         }
@@ -75,37 +99,62 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
           break;
         }
         case "copyright":
-        case "rights": {
+        case "rights":
+        case "dc:rights": {
           feed.copyright = getContentString(node);
           break;
         }
-        case "author": {
-          // For RSS the author is the text, for Atom it's an element
-          if (feed.type === "rss") {
-            feed.author = {
-              name: getContentString(node),
-            };
-          } else if (feed.type === "atom") {
-            const author = {
-              name: "",
-            };
-            feed.author = author;
-            processAuthorNode(node, author);
+        case "managingeditor": {
+          // In RSS, we set the author to the managingEditor field
+          feed.author = feed.author || {};
+          feed.author.email = getContentString(node);
+          break;
+        }
+        case "webmaster": {
+          // In RSS, we set the author to the webMaster field if there is no managingEditor field
+          feed.author = feed.author || {};
+          if (!feed.author.email) {
+            feed.author.email = getContentString(node);
           }
           break;
         }
-        case "date":
+        case "dc:creator": {
+          // In RSS, this is often used to supply a name rather than an email
+          feed.author = feed.author || {};
+          feed.author.name = getContentString(node);
+          break;
+        }
+        case "author": {
+          feed.author = feed.author || {};
+          processPersonNode(node, feed.author);
+          break;
+        }
+        case "contributor": {
+          feed.contributors = feed.contributors || [];
+          const contributor = {};
+          processPersonNode(node, contributor);
+          feed.contributors.push(contributor);
+          break;
+        }
+        case "lastbuilddate":
         case "updated": {
           feed.updatedAt = getContentString(node);
           break;
         }
-        case "pubDate":
+        case "pubdate":
         case "published": {
           feed.publishedAt = getContentString(node);
           break;
         }
         case "image": {
-          feed.image = getContentString(node);
+          feed.image = {};
+          processImageNode(node, feed.image);
+          break;
+        }
+        case "logo": {
+          feed.image = {
+            url: getContentString(node),
+          };
           break;
         }
         case "favicon": {
@@ -116,15 +165,33 @@ function processFeedNode(feedNode: TxmlNode, feed: FeedData) {
           feed.generator = getContentString(node);
           break;
         }
-        //case "categories": {
-        //  feed.categories = getContentString(node);
-        //  break;
-        //}
+        case "category": {
+          feed.categories = feed.categories || [];
+          if (feed.type === "rss") {
+            feed.categories.push(getContentString(node));
+          } else if (feed.type === "atom") {
+            if (node.attributes["term"]) {
+              feed.categories.push(node.attributes["term"]);
+            }
+          }
+          break;
+        }
         case "item":
         case "entry": {
+          // In Atom, check for xml:lang if the feed's language hasn't been set
+          if (
+            feed.type === "atom" &&
+            !feed.language &&
+            node.attributes["xml:lang"]
+          ) {
+            feed.language = node.attributes["xml:lang"];
+          }
+
+          // Process the entry
           const entry = {};
           feed.entries.push(entry);
           processEntryNode(node, feed, entry);
+
           break;
         }
       }
@@ -140,7 +207,8 @@ function processEntryNode(
   for (let node of entryNode.children) {
     if (nodeIsElement(node)) {
       node = node as TxmlNode;
-      switch (node.tagName) {
+      const tagName = node.tagName.toLowerCase();
+      switch (tagName) {
         case "title": {
           entry.title = getContentString(node);
           break;
@@ -150,8 +218,37 @@ function processEntryNode(
           break;
         }
         case "description":
-        case "content": {
-          entry.content = getContentString(node);
+        case "content":
+        case "content:encoded": {
+          if (
+            feed.type === "rss" &&
+            entry.content &&
+            !entry.summary &&
+            tagName === "content:encoded"
+          ) {
+            // HACK: If this is the content:encoded tag, we should move the existing description into the summary
+            // This assumes that content:encoded comes after description, which may not be a valid assumption
+            entry.summary = entry.content;
+          }
+
+          // HACK: Assume that all RSS description and content is encoded
+          const withHtml = feed.type === "rss";
+          entry.content = getContentString(node, withHtml || undefined);
+
+          // Default the content text by stripping out HTML
+          if (!entry.contentText) {
+            entry.contentText = getContentString(node, false);
+          }
+
+          // In Atom, check for xml:lang if the feed's language hasn't been set
+          if (
+            feed.type === "atom" &&
+            !feed.language &&
+            node.attributes["xml:lang"]
+          ) {
+            feed.language = node.attributes["xml:lang"];
+          }
+
           break;
         }
         case "link": {
@@ -159,8 +256,28 @@ function processEntryNode(
           if (feed.type === "rss") {
             entry.entryUrl = getContentString(node);
           } else if (feed.type === "atom") {
-            if (node.attributes["rel"] === "alternate") {
-              entry.entryUrl = node.attributes["href"];
+            const rel = node.attributes["rel"];
+            switch (rel) {
+              case null:
+              case undefined:
+              case "alternate":
+              case "self": {
+                entry.entryUrl = node.attributes["href"];
+                break;
+              }
+              case "replies": {
+                entry.commentsUrl = node.attributes["href"];
+                break;
+              }
+              case "enclosure": {
+                entry.attachments = entry.attachments || [];
+                entry.attachments.push({
+                  url: node.attributes["href"],
+                  type: node.attributes["type"],
+                  length: parseInt(node.attributes["length"]),
+                });
+                break;
+              }
             }
           }
           break;
@@ -177,23 +294,29 @@ function processEntryNode(
           // For RSS the author is the text, for Atom it's an element
           if (feed.type === "rss") {
             entry.author = {
-              name: getContentString(node),
+              email: getContentString(node),
             };
           } else if (feed.type === "atom") {
             const author = {
               name: "",
             };
             entry.author = author;
-            processAuthorNode(node, author);
+            processPersonNode(node, author);
           }
           break;
         }
-        case "date":
+        case "contributor": {
+          entry.contributors = entry.contributors || [];
+          const contributor = {};
+          processPersonNode(node, contributor);
+          entry.contributors.push(contributor);
+          break;
+        }
         case "updated": {
           entry.updatedAt = getContentString(node);
           break;
         }
-        case "pubDate":
+        case "pubdate":
         case "published": {
           entry.publishedAt = getContentString(node);
           break;
@@ -207,32 +330,75 @@ function processEntryNode(
           entry.commentsUrl = getContentString(node);
           break;
         }
-        //case "image": {
-        //  entry.image = getContentString(node);
-        //  break;
-        //}
-        //case "categories": {
-        //  entry.categories = getContentString(node);
-        //  break;
-        //}
-        //case "source": {
-        //  entry.source = getContentString(node);
-        //  break;
-        //}
-        //case "enclosures": {
-        //  entry.attachments = getContentString(node);
-        //  break;
-        //}
+        case "image": {
+          // HACK: This is not an official part of the spec, but I'm including it here just in case?
+          entry.image = {};
+          processImageNode(node, entry.image);
+          break;
+        }
+        case "category": {
+          entry.categories = entry.categories || [];
+          if (feed.type === "rss") {
+            entry.categories.push(getContentString(node));
+          } else if (feed.type === "atom") {
+            if (node.attributes["term"]) {
+              entry.categories.push(node.attributes["term"]);
+            }
+          }
+          break;
+        }
+        case "source": {
+          entry.source = {
+            url: node.attributes["url"],
+            title: getContentString(node),
+          };
+          break;
+        }
+        case "enclosure": {
+          entry.attachments = entry.attachments || [];
+          entry.attachments.push({
+            url: node.attributes["url"],
+            type: node.attributes["type"],
+            length: parseInt(node.attributes["length"]),
+          });
+          break;
+        }
       }
     }
   }
 }
 
-function processAuthorNode(authorNode: TxmlNode, author: PersonData) {
+function processImageNode(imageNode: TxmlNode, image: ImageData) {
+  for (let node of imageNode.children) {
+    if (nodeIsElement(node)) {
+      node = node as TxmlNode;
+      switch (node.tagName.toLowerCase()) {
+        case "url": {
+          image.url = getContentString(node);
+          break;
+        }
+        case "title": {
+          image.title = getContentString(node);
+          break;
+        }
+        case "height": {
+          image.height = parseInt(getContentString(node));
+          break;
+        }
+        case "width": {
+          image.width = parseInt(getContentString(node));
+          break;
+        }
+      }
+    }
+  }
+}
+
+function processPersonNode(authorNode: TxmlNode, author: PersonData) {
   for (let node of authorNode.children) {
     if (nodeIsElement(node)) {
       node = node as TxmlNode;
-      switch (node.tagName) {
+      switch (node.tagName.toLowerCase()) {
         case "name": {
           author.name = getContentString(node);
           break;
@@ -250,19 +416,60 @@ function processAuthorNode(authorNode: TxmlNode, author: PersonData) {
   }
 }
 
-function processChildNodes(
-  children: (TxmlNode | string)[],
-  result: FeedData,
-  processFunction: (node: TxmlNode, result: FeedData) => void
-) {
-  for (let child of children) {
-    if (nodeIsElement(child)) {
-      processFunction(child as TxmlNode, result);
-    }
+function getContentString(node: TxmlNode, withHtml?: boolean): string {
+  let content = "";
+
+  if (withHtml === undefined) {
+    const nodeType = node.attributes["type"];
+    withHtml = nodeType === "html" || nodeType === "xhtml";
   }
+
+  node.children.forEach((child, i) => {
+    if (typeof child === "string") {
+      // Trim the start of the first child and the end of the last child, but leave middle children alone
+      // This means that spaces between elements will be preserved but newlines etc will be removed from the start and end
+      let childContent = child;
+      if (i === 0) {
+        childContent = childContent.trimStart();
+      }
+      if (i === node.children.length - 1) {
+        childContent = childContent.trimEnd();
+      }
+      content += childContent;
+    } else {
+      child = child as TxmlNode;
+      if (withHtml) {
+        content += "<";
+        content += child.tagName;
+        Object.entries(child.attributes).forEach(([name, value]) => {
+          content += " ";
+          content += name;
+          content += '="';
+          content += value;
+          content += '"';
+        });
+        content += ">";
+      }
+      content += getContentString(child, withHtml);
+      if (withHtml) {
+        content += "</";
+        content += child.tagName;
+        content += ">";
+      }
+    }
+  });
+
+  // Unescape basic HTML
+  content = content
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+
+  return content;
 }
 
-function getContentString(node: TxmlNode): string {
+/*
+function getContentString(node: TxmlNode, withHtml = false): string {
   let content = "";
   node.children.forEach((child, i) => {
     if (typeof child === "string") {
@@ -278,24 +485,29 @@ function getContentString(node: TxmlNode): string {
       content += childContent;
     } else {
       child = child as TxmlNode;
-      content += "<";
-      content += child.tagName;
-      Object.entries(child.attributes).forEach(([name, value]) => {
-        content += " ";
-        content += name;
-        content += '="';
-        content += value;
-        content += '"';
-      });
-      content += ">";
-      content += getContentString(child);
-      content += "</";
-      content += child.tagName;
-      content += ">";
+      if (withHtml) {
+        content += "<";
+        content += child.tagName;
+        Object.entries(child.attributes).forEach(([name, value]) => {
+          content += " ";
+          content += name;
+          content += '="';
+          content += value;
+          content += '"';
+        });
+        content += ">";
+      }
+      content += getContentString(child, withHtml);
+      if (withHtml) {
+        content += "</";
+        content += child.tagName;
+        content += ">";
+      }
     }
   });
   return content;
 }
+*/
 
 //function nodeIsText(node: TxmlNode | string) {
 //  return typeof node === "string";

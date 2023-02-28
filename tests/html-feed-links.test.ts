@@ -3,7 +3,7 @@ import * as assert from "uvu/assert";
 import grabFeedLinks from "../src/grabFeedLinks";
 import FeedLink from "../types/FeedLink";
 
-test("Feed links", () => {
+test("Feed links in HTML are extracted", () => {
   const html = `
 <html>
   <head>

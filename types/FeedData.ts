@@ -1,5 +1,6 @@
 import PersonData from "./PersonData";
 import EntryData from "./EntryData";
+import ImageData from "./ImageData";
 
 /**
  * Data about an RSS, Atom or JSON feed.
@@ -44,13 +45,14 @@ export default interface FeedData {
   /**
    * A copyright notice for the feed.
    *
-   * In RSS this is the `copyright` field. In Atom this is the `rights` field.
+   * In RSS this is the `copyright` field. In Atom this is the `rights` field. In JF this is not used.
    */
   copyright?: string;
   /**
    * The author of the feed.
    *
    * In RSS this is the `managingEditor` field, falling back to the `webMaster` field. In Atom this is the `author` field.
+   * In JF this is not used.
    */
   author?: PersonData;
   /**
@@ -62,13 +64,13 @@ export default interface FeedData {
   /**
    * The date and time at which this feed was published.
    *
-   * In RSS this is the `pubDate` field. In Atom this is not used.
+   * In RSS this is the `pubDate` field. In Atom and JF this is not used.
    */
   publishedAt?: string;
   /**
    * The date and time at which this feed was last updated.
    *
-   * In RSS this is the `lastBuildDate` field. In Atom this is the `updated` field.
+   * In RSS this is the `lastBuildDate` field. In Atom this is the `updated` field. In JF this is not used.
    */
   updatedAt?: string;
   /**
@@ -76,7 +78,7 @@ export default interface FeedData {
    *
    * In RSS this is the `image` field. In Atom this is the `logo` field. In JF this is the `icon` field.
    */
-  image?: string;
+  image?: ImageData;
   /**
    * A favicon that can be displayed with this feed.
    *
@@ -86,13 +88,13 @@ export default interface FeedData {
   /**
    * One or more categories that the feed belongs to.
    *
-   * In RSS and Atom this is the `category` field.
+   * In RSS and Atom this is the `category` field. In JF this is not used.
    */
   categories?: string[];
   /**
    * The program used to generate the feed.
    *
-   * In RSS and Atom this is the `generator` field.
+   * In RSS and Atom this is the `generator` field. In JF this is not used.
    */
   generator?: string;
   ///**
