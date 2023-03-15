@@ -10,7 +10,15 @@ Use `npm` (or `yarn`, or `pnpm`) to add grab-feed-data to your project:
 npm install grab-feed-data
 ```
 
-grab-feed-data contains CommonJS and ESM modules for use in Node and the browser.
+grab-feed-data contains CommonJS and ESM modules for use in Node, in the browser and at the edge.
+
+## Usage
+
+```ts
+import { grabFeedData } from 'grab-feed-data';
+const xml = '<xml></xml>';
+const feed = grabFeedData(xml);
+```
 
 ## Fields
 
@@ -24,9 +32,9 @@ grab-feed-data contains CommonJS and ESM modules for use in Node and the browser
 | homeUrl      | link                        | link with rel=nothing/"alternate" | home_page_url  |
 | feedUrl      | -                           | link with rel="self"              | feed_url       |
 | language     | language                    | xml:lang on feed/entry/content    | language       |
-| copyright    | copyright                   | rights                            | -              |
+| copyright    | copyright/dc:rights         | rights                            | -              |
 | author       | managingEditor or webMaster | author                            | -              |
-| contributors | -                           | contributor                       | authors/author |
+| contributors | dc:creator                  | contributor                       | authors/author |
 | publishedAt  | pubDate                     | -                                 | -              |
 | updatedAt    | lastBuildDate               | updated                           | -              |
 | image        | image                       | logo                              | icon           |
@@ -46,7 +54,7 @@ grab-feed-data contains CommonJS and ESM modules for use in Node and the browser
 | entryUrl     | link        | link with rel=nothing/"alternate"        | link           |
 | externalUrl  | -           | -                                        | external_url   |
 | author       | author      | author                                   | -              |
-| contributors | -           | contributor                              | authors/author |
+| contributors | dc:creator  | contributor                              | authors/author |
 | publishedAt  | pubDate     | -                                        | date_published |
 | updatedAt    | -           | updated                                  | date_modified  |
 | guid         | guid        | id                                       | id             |
