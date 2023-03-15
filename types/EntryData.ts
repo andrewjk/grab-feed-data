@@ -62,7 +62,7 @@ export default interface EntryData {
   /**
    * The date and time at which this entry was published.
    *
-   * In RSS this is the `pubDate` field. In Atom this is not used. In JF this is the `date_published` field.
+   * In RSS this is the `pubDate` field. In Atom this is the `updated` field. In JF this is the `date_published` field.
    */
   publishedAt?: string;
   /**

@@ -45,7 +45,7 @@ export default interface FeedData {
   /**
    * A copyright notice for the feed.
    *
-   * In RSS this is the `copyright` field. In Atom this is the `rights` field. In JF this is not used.
+   * In RSS this is the `copyright` or `dc:rights` field. In Atom this is the `rights` field. In JF this is not used.
    */
   copyright?: string;
   /**
@@ -58,15 +58,15 @@ export default interface FeedData {
   /**
    * Multiple authors who contribute to this feed.
    *
-   * In RSS this is not used. In Atom this is the `contributor` fields. In JF this is the `authors` field.
+   * In RSS this may be the `dc:creator` field(s). In Atom this is the `contributor` fields. In JF this is the `authors` field.
    */
   contributors?: PersonData[];
-  /**
-   * The date and time at which this feed was published.
-   *
-   * In RSS this is the `pubDate` field. In Atom and JF this is not used.
-   */
-  publishedAt?: string;
+  ///**
+  // * The date and time at which this feed was published.
+  // *
+  // * In RSS this is the `pubDate` field. In Atom and JF this is not used.
+  // */
+  //publishedAt?: string;
   /**
    * The date and time at which this feed was last updated.
    *

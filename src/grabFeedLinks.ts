@@ -1,33 +1,33 @@
-import * as txml from "txml";
 import FeedLink from "../types/FeedLink";
-import TxmlNode from "../types/TxmlNode";
+import { grabXml, XmlNode } from "../../grab-xml/dist";
 
 /** Grab available feeds from a HTML page by checking for links with rel="alternate" */
 export default function grabFeedLinks(html: string): FeedLink[] {
   const result: FeedLink[] = [];
 
   // TODO: Only check for links in the <head> as rel="alternate" is not body-ok
-  const doc = txml.parse(html);
-  for (let node of doc) {
+  const doc = grabXml(html);
+  for (let node of doc.children) {
     processNode(node, result);
   }
 
   return result;
 }
 
-function processNode(node: TxmlNode, result: FeedLink[]) {
+function processNode(node: XmlNode, result: FeedLink[]) {
   // Is it a `link` node with rel="alternate"?
   if (
-    node.tagName === "link" &&
+    node.tag === "link" &&
     node.attributes &&
     node.attributes["rel"] === "alternate"
   ) {
     // We need at least type and href
-    let type = node.attributes["type"];
+    let nodeType = node.attributes["type"];
     const url = node.attributes["href"];
 
     // TODO: Is this a valid assumption for all feeds? Or are there other (potentially messed up) types out there?
-    switch (type) {
+    let type: "unknown" | "rss" | "atom" | "json";
+    switch (nodeType) {
       case "application/rss":
       case "application/rss+xml": {
         type = "rss";
@@ -44,7 +44,7 @@ function processNode(node: TxmlNode, result: FeedLink[]) {
         break;
       }
       default: {
-        type = undefined;
+        type = "unknown";
         break;
       }
     }
@@ -65,10 +65,7 @@ function processNode(node: TxmlNode, result: FeedLink[]) {
   // Process this node's children
   if (node.children) {
     for (let child of node.children) {
-      // @ts-ignore
-      if (child.tagName) {
-        processNode(child as TxmlNode, result);
-      }
+      processNode(child, result);
     }
   }
 }

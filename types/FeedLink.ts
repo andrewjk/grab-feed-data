@@ -3,9 +3,9 @@
  */
 export default interface FeedLink {
   /**
-   * The type of feed, which can be `rss`, `atom` or `json`.
+   * The type of feed, which can be `unknown`, `rss`, `atom` or `json`.
    */
-  type: "rss" | "atom" | "json";
+  type: "unknown" | "rss" | "atom" | "json";
   /**
    * The URL at which the feed can be accessed.
    */
