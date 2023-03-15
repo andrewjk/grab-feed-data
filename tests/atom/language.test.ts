@@ -16,9 +16,9 @@ test("Atom language from feed element", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.language, "en-us");
+  assert.equal(actual.language, "en-us");
 });
 
 test("Atom language from entry element", () => {
@@ -35,9 +35,9 @@ test("Atom language from entry element", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.language, "en-gb");
+  assert.equal(actual.language, "en-gb");
 });
 
 test("Atom language from content element", () => {
@@ -54,9 +54,9 @@ test("Atom language from content element", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.language, "en-au");
+  assert.equal(actual.language, "en-au");
 });
 
 test.run();

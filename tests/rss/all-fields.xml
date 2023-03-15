@@ -1,0 +1,37 @@
+<rss version="2.0">
+    <channel>
+        <title>Feed title</title>
+        <link>http://example.org/feed-link</link>
+        <description>Feed description</description>
+        <language>en-us</language>
+        <copyright>Feed copyright</copyright>
+        <pubDate>Tue, 10 Jun 2003 04:00:00 GMT</pubDate>
+        <lastBuildDate>Tue, 10 Jun 2003 09:41:01 GMT</lastBuildDate>
+        <category>Feed category one</category>
+        <category>Feed category two</category>
+        <docs>http://example.org/feed-docs</docs>
+        <generator>Feed generator</generator>
+        <managingEditor>feed-editor@example.org</managingEditor>
+        <webMaster>feed-webmaster@example.org</webMaster>
+        <image>
+            <url>https://example.org/feed-logo.png</url>
+            <title>Feed logo title</title>
+            <link>http://example.org/feed-logo-link</link>
+            <width>100</width>
+            <height>75</height>
+        </image>
+        <item>
+            <title>Entry 0 title</title>
+            <link>http://example.org/entry-0-link</link>
+            <description>Entry 0 description</description>
+            <author>entry-0-author@example.org</author>
+            <category>Entry 0 category one</category>
+            <category>Entry 0 category two</category>
+            <comments>http://example.org/entry-0-comments-link</comments>
+            <enclosure url="http://example.org/entry-0-enclosure-link" length="12216320" type="audio/mpeg" />
+            <pubDate>Tue, 03 Jun 2003 09:39:21 GMT</pubDate>
+            <guid>Entry 0 guid</guid>
+            <source url="http://example.org/entry-0-source">Entry 0 source</source>
+        </item>
+    </channel>
+</rss>

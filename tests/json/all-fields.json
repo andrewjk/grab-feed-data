@@ -1,0 +1,42 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Feed title",
+  "home_page_url": "https://example.org/feed-home-url",
+  "feed_url": "https://example.org/feed-url",
+  "description": "Feed description",
+  "icon": "https://example.org/feed-icon",
+  "favicon": "https://example.org/feed-favicon",
+  "authors": [
+    {
+      "name": "Feed author 1"
+    },
+    {
+      "name": "Feed author 2"
+    }
+  ],
+  "language": "en-us",
+  "items": [
+    {
+      "id": "Entry 0 id",
+      "url": "https://example.org/entry-0-url",
+      "external_url": "https://example.org/entry-0-external-url",
+      "title": "Entry 0 title",
+      "content_html": "<p>Entry 0 content</p>",
+      "content_text": "Entry 0 text content",
+      "summary": "Entry 0 summary",
+      "image": "https://example.org/entry-0-image",
+      "date_published": "2010-02-07T14:04:00-05:00",
+      "date_modified": "2010-02-08T14:04:00-05:00",
+      "authors": [
+        {
+          "name": "Entry 0 author 1"
+        },
+        {
+          "name": "Entry 0 author 2"
+        }
+      ],
+      "tags": ["Entry 0 tag one", "Entry 0 tag two"],
+      "language": "en-gb"
+    }
+  ]
+}

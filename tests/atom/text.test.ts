@@ -12,9 +12,9 @@ test("Atom text content", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.title, "Less: <");
+  assert.equal(actual.title, "Less: <");
 });
 
 test("Atom html content", () => {
@@ -27,9 +27,9 @@ test("Atom html content", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.title, "Less: <em> &lt; </em>");
+  assert.equal(actual.title, "Less: <em> &lt; </em>");
 });
 
 test("Atom xhtml content", () => {
@@ -44,7 +44,9 @@ test("Atom xhtml content", () => {
 </feed>
 `;
 
-  const result = grabFeedData(xml);
+  const actual = grabFeedData(xml);
 
-  assert.equal(result.title, "Less: <em> &</em>");
+  assert.equal(actual.title, "<div>\n      Less: <em> < </em>\n    </div>");
 });
+
+test.run();
