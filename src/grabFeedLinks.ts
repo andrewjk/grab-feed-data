@@ -1,5 +1,5 @@
 import FeedLink from "../types/FeedLink";
-import { grabXml, XmlNode } from "../../grab-xml/dist";
+import { grabXml, XmlNode } from "grab-xml";
 
 /** Grab available feeds from a HTML page by checking for links with rel="alternate" */
 export default function grabFeedLinks(html: string): FeedLink[] {

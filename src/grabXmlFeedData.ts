@@ -1,4 +1,4 @@
-import { grabXml, type XmlNode, XmlNodeType } from "../../grab-xml/dist";
+import { grabXml, type XmlNode, XmlNodeType } from "grab-xml";
 import FeedData from "../types/FeedData";
 import EntryData from "../types/EntryData";
 import PersonData from "../types/PersonData";
