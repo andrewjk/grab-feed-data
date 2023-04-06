@@ -2,6 +2,15 @@
   "name": "grab-feed-data",
   "version": "1.0.1",
   "description": "Grabs feed and entry data out of an RSS, Atom or JSON Feed file",
+  "keywords": [
+    "rss",
+    "atom",
+    "jsonfeed",
+    "feed"
+  ],
+  "author": "andrewjk",
+  "license": "ISC",
+  "homepage": "https://github.com/andrewjk/grab-feed-data",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "browser": "dist/index.mjs",
@@ -16,14 +25,6 @@
     "check": "tsc -p tsconfig-check.json --noEmit",
     "release": "tsup && np"
   },
-  "keywords": [
-    "rss",
-    "atom",
-    "jsonfeed",
-    "feed"
-  ],
-  "author": "andrewjk",
-  "license": "ISC",
   "devDependencies": {
     "@types/node": "^18.15.11",
     "np": "^7.7.0",
