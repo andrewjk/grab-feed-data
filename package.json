@@ -1,6 +1,6 @@
 {
   "name": "grab-feed-data",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Grabs feed and entry data out of an RSS, Atom or JSON Feed file",
   "keywords": [
     "rss",
