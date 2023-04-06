@@ -1,10 +1,11 @@
-import { test } from "uvu";
 import * as assert from "uvu/assert";
 import grabOpmlData from "../../src/grabOpmlData";
 import OpmlData from "../../types/OpmlData";
 
-test("OPML tags", () => {
-  const opml = `
+export default {
+  name: "OPML tags",
+  test: () => {
+    const opml = `
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <opml version="2.0">
 	<head>
@@ -25,26 +26,25 @@ test("OPML tags", () => {
 </opml>  
 `;
 
-  const result = grabOpmlData(opml);
+    const result = grabOpmlData(opml);
 
-  const expected: OpmlData = {
-    title: "mySubscriptions.opml",
-    feeds: [
-      {
-        type: "rss",
-        text: "CNET News.com",
-        feedUrl: "http://news.com.com/2547-1_3-0-5.xml",
-      },
-      {
-        type: "rss",
-        text: "NYT > Technology",
-        feedUrl: "http://www.nytimes.com/services/xml/rss/nyt/Technology.xml",
-        tags: ["Tech", "News"],
-      },
-    ],
-  };
+    const expected: OpmlData = {
+      title: "mySubscriptions.opml",
+      feeds: [
+        {
+          type: "rss",
+          text: "CNET News.com",
+          feedUrl: "http://news.com.com/2547-1_3-0-5.xml",
+        },
+        {
+          type: "rss",
+          text: "NYT > Technology",
+          feedUrl: "http://www.nytimes.com/services/xml/rss/nyt/Technology.xml",
+          tags: ["Tech", "News"],
+        },
+      ],
+    };
 
-  assert.equal(result, expected);
-});
-
-test.run();
+    assert.equal(result, expected);
+  },
+};
